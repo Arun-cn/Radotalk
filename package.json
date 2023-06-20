@@ -1,0 +1,8 @@
+{
+  "name": "radotalk",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": "https://github.com/Arun-cn/Radotalk.git",
+  "author": "Arun-cn <arunchandran4321@gmail.com>",
+  "license": "MIT"
+}
