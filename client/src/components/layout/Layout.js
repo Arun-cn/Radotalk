@@ -1,5 +1,5 @@
 import React , {Children}from 'react';
-import Headers from './headers';
+import Headers from './Headers';
 import Footer from './Footer';
 
 
