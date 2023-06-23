@@ -33,7 +33,7 @@ const loginController = async (req,res) =>{
         const options = {
             expiresIn: '1h'
           };
-        const token = await Jwt.sign({_id : user._id},process.env.JWT_SECRET,options)  ;
+        const token = await jwt.sign({_id : user._id},process.env.JWT_SECRET,options)  ;
         
     
         res.status(200).send({
