@@ -6,8 +6,8 @@ const Headers = () => {
 
 <nav className="navbar navbar-expand-lg bg-body-tertiary">
   <div className="container-fluid">
-    <a className="navbar-brand" href="#">Navbar</a>
-    <button className="btn">
+    <a className="navbar-brand" href="#">Radotalk</a>
+    <button className="btn">Register
       
     </button>
     
