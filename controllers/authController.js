@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const {haspassword,comparePassword} = require('../helper/authHelper');
 
+
 const loginController = async (req,res) =>{
     const {email,password} = req.body;
     try {
@@ -60,4 +61,47 @@ const loginController = async (req,res) =>{
 
 }
 
-module.exports = loginController ;
+   const registerController = async(req,res)=>{
+    try {
+      const {email,name,password,} = req.body;
+      //validations
+      if(!email){
+          res.send({error:'email is requied'});
+      }
+      if(!password){
+          res.send({error:'password is requied'});
+      }
+     
+      
+     
+      //checkuser
+      const existingUser = await User.findOne({email});
+      //existing user
+      if (existingUser){
+          res.status(200).send({
+              success:true,
+              message:"already exisit please login"
+          })
+      }
+      //hashpassword
+      const hasedpasword = await haspassword(password);
+      //save user
+      const user = await new User({email,password:hasedpasword}).save();
+      res.status(200).send({
+          success:true,
+          message:"user registed succes full",
+          user
+      });
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+          success:false,
+          masage:'error in message',
+          error
+      })
+    }
+};
+
+
+module.exports = {loginController,registerController} ;
