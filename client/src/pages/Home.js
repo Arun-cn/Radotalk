@@ -2,14 +2,18 @@ import React, { useState } from 'react'
 import Layout from '../components/layout/Layout';
 import {useAuth}from '../context/auth.js';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 const Home = () => {
+
+const navigate = useNavigate();
 const [email,setEmail] = useState("");
 const [password,setPassword] = useState("");
 const [auth,setAuth] = useAuth();
 
 const handleSubmit = async (e)=>{
   //e.preventDefault();
-
+ 
   try {
     const res = await axios.post("http://localhost:3000/api/v1/auth/login", {
       email,
@@ -23,6 +27,7 @@ const handleSubmit = async (e)=>{
         token:res.data.token
       });
       localStorage.setItem('auth',JSON.stringify(res.data));
+      navigate('/dashboard')
     } else {
      
    
