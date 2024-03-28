@@ -6,7 +6,7 @@ const {haspassword,comparePassword} = require('../helper/authHelper');
 const loginController = async (req,res) =>{
     const {email,password} = req.body;
     try {
-        const {email,password}= req.body;
+        
         if(!email || !password ){
             res.status(404).send({
                 success:false,

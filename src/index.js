@@ -1,32 +1,62 @@
 
 const express = require('express');
-const app = express();
 const http = require('http');
-
+const session = require('express-session');
+const sharedsession = require('express-socket.io-session');
 const {Server} = require('socket.io')
-
 const cors = require('cors');
 const connectDB  = require('./config/db');
 const router = require('./routes/authRoute');
+const path = require('path');
 
-const server =  http.createServer(app);
-const io = new Server(server,{
-  cors:{
-    origin:'http://localhost:3007'
-  }
-});
-app.use(express.json());
+const { userSocket } = require('./userSocket');
 
-app.get('/',(req,res)=>{
-    res.send("<h1>radotalk<h1>")
-})
-
-app.use("/api/v1/auth",router);
+// Conenect mongodb 
 connectDB();
 
-io.on('connection',(server)=>{
-  console.log('user connected');
+const app = express();
+app.use(express.json());
+
+// Session middleware
+const sessionMiddleware = session({
+  secret: 'secret key',
+  resave: false,
+  saveUninitialized: true
 });
+app.use(sessionMiddleware);
+
+
+const server =  http.createServer(app);
+
+const io = new Server(server);
+/*io.use(sharedsession(sessionMiddleware, {
+  autoSave: true
+}));*/
+
+
+
+const publicDirectoryPath = path.join(__dirname, 'public');
+
+// Serve static files from public directory (approach 1)
+app.use(express.static(publicDirectoryPath));
+
+// API route to send index.html (approach 2 - optional)
+app.get('/', (req, res) => {
+  const filePath = path.join(publicDirectoryPath, 'index.html'); // Specify full path to index.html
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Failed to send index.html');
+    } else {
+      console.log('index.html sent successfully');
+    }
+  });
+});
+  
+app.use("/api/v1/auth",router);
+
+// Handle WebSocket connections
+io.on('connection', userSocket);
 
 
 server.listen(3000,()=>{
