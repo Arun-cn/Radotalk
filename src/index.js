@@ -56,7 +56,19 @@ app.get('/', (req, res) => {
 app.use("/api/v1/auth",router);
 
 // Handle WebSocket connections
-io.on('connection', userSocket);
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  
+  socket.on('chat message', (msg) => {
+    console.log(`user send msg:${msg}`)
+    io.emit('chat message',msg);
+  });
+
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
 
 
 server.listen(3000,()=>{
