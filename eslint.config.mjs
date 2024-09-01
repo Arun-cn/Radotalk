@@ -1,7 +1,7 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import prettier from "eslint-plugin-prettier";
-import prettierConfig from "eslint-config-prettier";
+import globals from 'globals';
+import pluginJs from '@eslint/js';
+import prettier from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 
 export default [
   {
@@ -12,7 +12,7 @@ export default [
       prettier,
     },
     rules: {
-      "prettier/prettier": "error", // Ensure Prettier errors are flagged by ESLint
+      'prettier/prettier': 'error', // Ensure Prettier errors are flagged by ESLint
     },
   },
   pluginJs.configs.recommended,

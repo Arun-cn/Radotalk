@@ -5,7 +5,7 @@ const sharedsession = require('express-socket.io-session');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const router = require('./routes/authRoute');
+const router = require('./routes');
 const path = require('path');
 
 const { userSocket } = require('./userSocket');
@@ -49,7 +49,7 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use('/api/v1/auth', router);
+app.use('/api', router);
 
 // Handle WebSocket connections
 io.on('connection', (socket) => {
