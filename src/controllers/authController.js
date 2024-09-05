@@ -1,5 +1,8 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const asyncHandler = require('../utils/asyncHandler');
+const ApiError = require('../utils/ApiError');
+const ApiResponse = require('../utils/ApiResponse');
 const { haspassword, comparePassword } = require('../helper/authHelper');
 
 const loginController = async (req, res) => {
@@ -53,43 +56,40 @@ const loginController = async (req, res) => {
   }
 };
 
-const registerController = async (req, res) => {
-  try {
-    const { email, name, password } = req.body;
-    //validations
-    if (!email) {
-      res.send({ error: 'email is requied' });
-    }
-    if (!password) {
-      res.send({ error: 'password is requied' });
-    }
-
-    //checkuser
-    const existingUser = await User.findOne({ email });
-    //existing user
-    if (existingUser) {
-      res.status(200).send({
-        success: true,
-        message: 'already exisit please login',
-      });
-    }
-    //hashpassword
-    const hasedpasword = await haspassword(password);
-    //save user
-    const user = await new User({ email, password: hasedpasword }).save();
-    res.status(200).send({
-      success: true,
-      message: 'user registed succes full',
-      user,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      success: false,
-      masage: 'error in message',
-      error,
-    });
+const registerController = asyncHandler(async (req, res) => {
+  const { email, name, password } = req.body;
+  //validations
+  // Check all fields not empty
+  if ([email, password, name].some((fields) => fields?.trim === '')) {
+    throw new ApiError(400, 'All fields are required');
   }
-};
+
+  //checkuser
+  const existingUser = await User.findOne({ email });
+
+  //existing user
+  if (existingUser) {
+    throw new ApiError(409, 'User with email or username already exists');
+  }
+
+  // Create new user
+  const user = new User({ name, email, password });
+  await user.save();
+
+  // Generate JWT token
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: '1d',
+  });
+
+  res
+    .status(201)
+    .json(
+      ApiResponse.successResponse(
+        { token, user: { id: user._id, name, email } },
+        'User registered successfully',
+        201,
+      ),
+    );
+});
 
 module.exports = { loginController, registerController };
