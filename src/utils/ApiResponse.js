@@ -1,3 +1,5 @@
+const { model } = require('mongoose');
+
 // utils/ApiResponse.js
 class ApiResponse {
   constructor(success, message, data = null, errors = [], statusCode = 200) {
@@ -25,4 +27,4 @@ class ApiResponse {
   }
 }
 
-export default ApiResponse;
+module.exports = ApiResponse;

@@ -6,4 +6,4 @@ const asyncHandler = (requsetHandler) => {
   };
 };
 
-export { asyncHandler };
+module.exports = asyncHandler;
