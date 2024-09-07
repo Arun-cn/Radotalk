@@ -58,10 +58,11 @@ const loginController = async (req, res) => {
 
 const registerController = asyncHandler(async (req, res) => {
   const { email, name, password } = req.body;
+
   //validations
   // Check all fields not empty
-  if ([email, password, name].some((fields) => fields?.trim === '')) {
-    throw new ApiError(400, 'All fields are required');
+  if (!email?.trim() || !password?.trim() || !name?.trim()) {
+    throw new ApiError(400, 'Email, password, and name are required');
   }
 
   //checkuser
