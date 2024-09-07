@@ -3,58 +3,43 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
-const { haspassword, comparePassword } = require('../helper/authHelper');
 
-const loginController = async (req, res) => {
+const loginController = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  try {
-    if (!email || !password) {
-      res.status(404).send({
-        success: false,
-        message: 'invalid email and password',
-      });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).send({
-        success: false,
-        message: 'user not found',
-      });
-    }
-    const match = await comparePassword(password, user.password);
-    if (!match) {
-      return res.status(200).send({
-        success: false,
-        message: 'password is invaild',
-      });
-    }
-    const options = {
-      expiresIn: '1h',
-    };
-    const token = await jwt.sign(
-      { _id: user._id },
-      process.env.JWT_SECRET,
-      options,
-    );
 
-    res.status(200).send({
-      success: true,
-      message: 'login seccessfully',
-      user: {
-        name: user.name,
-        email: user.email,
-      },
-      token,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status('500').send({
-      success: false,
-      masage: 'error in login',
-      error,
-    });
+  // Validate fields
+  if (!email?.trim() || !password?.trim()) {
+    throw new ApiError(400, 'Email and password are required');
   }
-};
+
+  // Check if user exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  // Check password using the model's method
+  const match = await user.comparePassword(password);
+  if (!match) {
+    throw new ApiError(401, 'Invalid password');
+  }
+
+  // Generate JWT token
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: '1h',
+  });
+
+  // Send success response
+  res
+    .status(200)
+    .json(
+      ApiResponse.successResponse(
+        { token, user: { id: user._id, name: user.name, email: user.email } },
+        'Login successful',
+        200,
+      ),
+    );
+});
 
 const registerController = asyncHandler(async (req, res) => {
   const { email, name, password } = req.body;
