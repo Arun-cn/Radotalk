@@ -1,14 +1,10 @@
 const express = require('express');
 const http = require('http');
 const session = require('express-session');
-const sharedsession = require('express-socket.io-session');
-const { Server } = require('socket.io');
-const cors = require('cors');
+const socketIo = require('socket.io');
 const connectDB = require('./config/db');
 const router = require('./routes');
 const path = require('path');
-
-const { userSocket } = require('./userSocket');
 
 // Conenect mongodb
 connectDB();
@@ -27,7 +23,7 @@ app.use(sessionMiddleware);
 
 const server = http.createServer(app);
 
-const io = new Server(server);
+const io = socketIo(server);
 /*io.use(sharedsession(sessionMiddleware, {
   autoSave: true
 }));*/
@@ -52,20 +48,29 @@ app.get('/', (req, res) => {
 
 app.use('/api', router);
 
-// Handle WebSocket connections
+// Handle Socket.io connections
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('New client connected:', socket.id);
 
-  socket.on('chat message', (msg) => {
-    console.log(`user send msg:${msg}`);
-    io.emit('chat message', msg);
+  // Handle 'join' event to associate a user with a socket
+  socket.on('join', (userId) => {
+    socket.join(userId); // Join the room with the user's ID
+    console.log(`User ${userId} joined the room`);
   });
 
+  // Handle 'message' event to send a message to a specific user
+  socket.on('message', ({ toUserId, fromUserId, message }) => {
+    io.to(toUserId).emit('message', { from: fromUserId, message });
+    console.log(`Message from ${fromUserId} to ${toUserId}: ${message}`);
+  });
+
+  // Handle disconnection
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    console.log('Client disconnected:', socket.id);
   });
 });
 
-server.listen(3000, () => {
-  console.log('server started 3000');
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
